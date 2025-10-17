@@ -14,14 +14,23 @@ stages:
   displayName: "Terraform CI (dev & prod)"
   jobs:
   - job: terraform_ci
-    displayName: "fmt, validate, plan (speculative)"
+    displayName: "fmt, validate, plan"
     steps:
     - checkout: self
 
-    - task: TerraformInstaller@1
-      displayName: "Install Terraform"
+    - task: Bash@3
+      displayName: "Install Terraform 1.9.5"
       inputs:
-        terraformVersion: '1.9.5'
+        targetType: inline
+        script: |
+          set -e
+          sudo apt-get update -y
+          sudo apt-get install -y wget unzip
+          TF_VERSION=1.9.5
+          wget https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip
+          unzip terraform_${TF_VERSION}_linux_amd64.zip
+          sudo mv terraform /usr/local/bin/terraform
+          terraform -version
 
     - script: terraform fmt -recursive -check
       displayName: "terraform fmt -check"
@@ -38,7 +47,7 @@ stages:
         echo "=== PLAN PROD ==="
         terraform plan -input=false -refresh=false -no-color \
           -var-file=envs/prod.tfvars -out=tfplan-prod
-      displayName: "terraform plan (dev & prod) - speculative"
+      displayName: "terraform plan (dev & prod)"
       continueOnError: true
 
     - task: PublishBuildArtifacts@1

@@ -91,18 +91,18 @@ stages:
 - stage: CD_PROD
   displayName: "Deploy PROD (Manual Approval)"
   dependsOn: CD_DEV
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
   jobs:
-  - deployment: deploy_prod
+  - job: deploy_prod
     displayName: "Apply PROD"
-    environment: 'Production'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - checkout: self
-          - script: |
-              echo "=== DEPLOY PROD ==="
-              terraform init -input=false
-              terraform workspace select prod || terraform workspace new prod
-              terraform apply -input=false -auto-approve -var-file=envs/prod.tfvars
-            displayName: "terraform apply PROD"
+    steps:
+    - checkout: self
+    - script: |
+        echo "=== DEPLOY PROD ==="
+        echo "⚠️  ATTENTION: Déploiement en PRODUCTION"
+        echo "Appuyez sur Ctrl+C pour annuler, ou attendez 10 secondes..."
+        sleep 10
+        terraform init -input=false
+        terraform workspace select prod || terraform workspace new prod
+        terraform apply -input=false -auto-approve -var-file=envs/prod.tfvars
+      displayName: "terraform apply PROD"

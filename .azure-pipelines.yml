@@ -71,3 +71,38 @@ stages:
         pathtoPublish: '.'
         artifactName: 'tfplans'
       condition: succeededOrFailed()
+
+- stage: CD_DEV
+  displayName: "Deploy DEV (Auto)"
+  dependsOn: CI
+  condition: succeeded()
+  jobs:
+  - job: deploy_dev
+    displayName: "Apply DEV"
+    steps:
+    - checkout: self
+    - script: |
+        echo "=== DEPLOY DEV ==="
+        terraform init -input=false
+        terraform workspace select dev || terraform workspace new dev
+        terraform apply -input=false -auto-approve -var-file=envs/dev.tfvars
+      displayName: "terraform apply DEV"
+
+- stage: CD_PROD
+  displayName: "Deploy PROD (Manual Approval)"
+  dependsOn: CD_DEV
+  jobs:
+  - deployment: deploy_prod
+    displayName: "Apply PROD"
+    environment: 'Production'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self
+          - script: |
+              echo "=== DEPLOY PROD ==="
+              terraform init -input=false
+              terraform workspace select prod || terraform workspace new prod
+              terraform apply -input=false -auto-approve -var-file=envs/prod.tfvars
+            displayName: "terraform apply PROD"

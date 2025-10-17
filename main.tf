@@ -1,10 +1,5 @@
 terraform {
-  backend "azurerm" {
-    resource_group_name  = "tfstate-rg"
-    storage_account_name = "tfstateabcd1234" # unique global
-    container_name       = "tfstate"
-    key                  = "rg-demo/terraform.tfstate"
-  }
+  backend "azurerm" {}
 
   required_providers {
     azurerm = {

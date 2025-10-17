@@ -9,7 +9,7 @@ pr:
       - main
       - feature/*
 
-# Utilise l’agent auto-hébergé installé sur ta VM
+# Utilise l'agent auto-hébergé installé sur ta VM
 pool:
   name: Default
 
@@ -50,12 +50,14 @@ stages:
         terraform validate
       displayName: "terraform init (no backend) & validate"
 
-    # Étape 4 — Planification pour dev et prod
+    # Étape 4 — Planification pour dev et prod avec backends séparés
     - script: |
         echo "=== PLAN DEV ==="
+        terraform init -backend-config=envs/dev.backend -input=false
         terraform plan -input=false -refresh=false -no-color \
           -var-file=envs/dev.tfvars -out=tfplan-dev
         echo "=== PLAN PROD ==="
+        terraform init -backend-config=envs/prod.backend -input=false
         terraform plan -input=false -refresh=false -no-color \
           -var-file=envs/prod.tfvars -out=tfplan-prod
       displayName: "terraform plan (dev & prod)"

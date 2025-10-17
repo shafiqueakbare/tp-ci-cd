@@ -99,7 +99,7 @@ stages:
     - checkout: self
     - script: |
         echo "=== DEPLOY PROD ==="
-        echo "⚠️  ATTENTION: Déploiement en PRODUCTION"
+        echo "ATTENTION: Déploiement en PRODUCTION"
         echo "Appuyez sur Ctrl+C pour annuler, ou attendez 10 secondes..."
         sleep 10
         terraform init -input=false

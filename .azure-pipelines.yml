@@ -50,14 +50,15 @@ stages:
         terraform validate
       displayName: "terraform init (no backend) & validate"
 
-    # Étape 4 — Planification pour dev et prod avec backends séparés
+    # Étape 4 — Planification pour dev et prod avec workspaces
     - script: |
         echo "=== PLAN DEV ==="
-        terraform init -backend-config=envs/dev.backend -input=false
+        terraform init -input=false
+        terraform workspace select dev || terraform workspace new dev
         terraform plan -input=false -refresh=false -no-color \
           -var-file=envs/dev.tfvars -out=tfplan-dev
         echo "=== PLAN PROD ==="
-        terraform init -backend-config=envs/prod.backend -input=false
+        terraform workspace select prod || terraform workspace new prod
         terraform plan -input=false -refresh=false -no-color \
           -var-file=envs/prod.tfvars -out=tfplan-prod
       displayName: "terraform plan (dev & prod)"
